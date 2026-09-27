@@ -1,184 +1,45 @@
 // @lens: sde
-title: Aletheon Drug Intelligence Pipeline
-summary: Parallel evidence to clinical reports
+title: Drug Evidence Research Workflow
+summary: Parallel evidence synthesis pipeline
 
-zone "Frontend / Ingestion Layer" [color: blue, pos: 79,2099, size: 774,191] {
-  CLI Command Router [icon: server, pos: 144,2147]
-  Ask Input Gateway [icon: fastapi, pos: 336,2158]
-  Input Sanitizer [icon: firewall, pos: 528,2158]
-  Intent Parser and Safety Screen [icon: openai, pos: 720,2158]
+zone "Application Workflow" [color: purple, pos: 507,241, size: 390,191] {
+  Workflow Entrypoint [icon: python, pos: 572,300]
+  Drug Research Graph [icon: langgraph, pos: 764,289]
+}
+zone "Evidence Modules" [color: blue, pos: 1019,53, size: 198,462] {
+  FDA Evidence Agent [icon: server, pos: 1084,195]
+  PubMed Evidence Agent [icon: server, pos: 1084,289]
+  Clinical Trials Evidence Agent [icon: server, pos: 1084,383]
+  bioRxiv Evidence Agent [icon: server, pos: 1084,101]
+}
+zone "Synthesis & State" [color: green, pos: 1339,140, size: 198,274] {
+  Drug State Schema [icon: database, pos: 1404,188]
+  RAG Synthesis Node [icon: langchain, pos: 1404,282]
+}
+zone "Generated Artifacts" [color: yellow, pos: 1642,379, size: 198,274] {
+  Final Drug Report [icon: document, pos: 1707,427]
+  Workflow Graph Image [icon: server, pos: 1707,521]
+}
+zone "Runtime Dependencies" [color: orange, pos: 12,252, size: 390,180] {
+  Dependency Manifest [icon: poetry, pos: 77,300]
+  Python Runtime [icon: python, pos: 269,300]
 }
 
-zone "Backend / Processing Layer" [color: purple, pos: 1019,926, size: 398,932] {
-  LangGraph Orchestrator [icon: server, pos: 1084,1346]
-  Drug State Reducers [icon: server, pos: 1284,1350]
-  FDA Fetcher [icon: server, pos: 1284,1068]
-  DailyMed Fetcher [C5] [icon: server]
-  ClinicalTrials Fetcher [icon: server, pos: 1284,1162]
-  EuropePMC Fetcher [icon: server, pos: 1284,1256]
-  Semantic Scholar Fetcher [icon: server, pos: 1284,1726]
-  PubChem Fetcher [icon: server, pos: 1284,1632]
-  ChEMBL Fetcher [icon: server, pos: 1284,1538]
-  PharmGKB Fetcher [icon: server, pos: 1284,974]
-  FAERS Fetcher [C1] [icon: server]
-  Evidence Combiner [A1] [icon: server]
-  Semantic Chunker [icon: server, pos: 1084,1594]
-  Embedding Worker [E2] [icon: server]
-  Section Retrieval Engine [B1/B2] [icon: server]
-  Structured Extraction Worker [Step 3] [icon: celery]
-  Extraction Rescue Classifier [icon: server, pos: 1284,1444]
-  Comparison Orchestrator [D1] [icon: server]
-  Head-to-Head Screening Gate [Step B] [icon: server]
-}
+Dependency Manifest > Python Runtime [conduit: package dependencies]
+Python Runtime > Workflow Entrypoint [conduit: execute]
+Workflow Entrypoint > Drug Research Graph [conduit: invoke]
+Drug State Schema > Drug Research Graph [conduit: state model]
+Drug Research Graph > FDA Evidence Agent [conduit: parallel in-process]
+Drug Research Graph > PubMed Evidence Agent [conduit: parallel in-process]
+Drug Research Graph > Clinical Trials Evidence Agent [conduit: parallel in-process]
+Drug Research Graph > bioRxiv Evidence Agent [conduit: parallel in-process]
+FDA Evidence Agent > RAG Synthesis Node [conduit: evidence collection]
+PubMed Evidence Agent > RAG Synthesis Node [conduit: evidence collection]
+Clinical Trials Evidence Agent > RAG Synthesis Node [conduit: evidence collection]
+bioRxiv Evidence Agent > RAG Synthesis Node [conduit: evidence collection]
+RAG Synthesis Node > Final Drug Report [conduit: report output]
+Drug Research Graph > Workflow Graph Image [conduit: Mermaid PNG]
 
-zone "LLM Call Sites / Synthesis Layer" [color: orange, pos: 1522,1164, size: 390,412] {
-  Embedding API Client [icon: openai, pos: 1779,1400]
-  Finding Extraction Client [icon: openai, pos: 1779,1212]
-  Report Synthesis Client [icon: openai, pos: 1587,1444]
-  Critic Agent [D2] [icon: openai]
-  Report Post Processor [A3] [icon: server]
-  Self Evaluation Heuristics [icon: server, pos: 1587,1306]
-  Corrective Retrieval Pass [icon: server, pos: 1779,1306]
-  Citation Verifier (built, disconnected) [icon: server]
-}
-
-zone "Data Layer" [color: green, pos: 70,1107, size: 198,650] {
-  Fetch Cache [E3] [icon: redis]
-  Evidence Repository [icon: database, pos: 135,1249]
-  Qdrant Vector Repository [icon: database, pos: 135,1437]
-  Extraction Cache [v2] [icon: redis]
-  Screening Decision Cache [icon: redis, pos: 135,1155]
-  PRISMA Counts Store [icon: database, pos: 135,1531]
-  Cost and Latency Store [E2] [icon: database]
-  Drug A Evidence Stream [icon: database, pos: 135,1625]
-  Drug B Evidence Stream [icon: database, pos: 135,1343]
-}
-
-zone "Output Layer" [color: yellow, pos: 370,295, size: 198,462] {
-  Drug Intelligence Report [icon: server, pos: 435,437]
-  Comparison Refusal Report [icon: server, pos: 435,531]
-  Markdown to PDF Exporter [B3] [icon: server]
-  Branded PDF Report [icon: server, pos: 435,343]
-  Batch Evaluation Harness [E1] [icon: server]
-  Quality Metrics CSV [icon: database, pos: 435,625]
-}
-
-zone "External Dependencies" [color: red, pos: 370,821, size: 198,1214] {
-  FDA Labels API [icon: server, pos: 435,1057]
-  DailyMed API [icon: server, pos: 435,1245]
-  ClinicalTrials API [icon: server, pos: 435,1151]
-  EuropePMC API [icon: server, pos: 435,1339]
-  Semantic Scholar API [icon: server, pos: 435,1809]
-  PubChem API [icon: server, pos: 435,1621]
-  ChEMBL API [icon: server, pos: 435,1433]
-  PharmGKB API [icon: server, pos: 435,963]
-  FAERS API [icon: server, pos: 435,1715]
-  OpenAI API [icon: openai, pos: 435,1527]
-  Crossref Retraction API [icon: server, pos: 435,869]
-  ReportLab Renderer [icon: server, pos: 435,1903]
-}
-
-zone "Platform & DevOps" [color: orange, pos: 849,623, size: 774,180] {
-  GitHub Repo [icon: github, pos: 914,671]
-  CI Pipeline [icon: github-actions, pos: 1106,671]
-  Image Registry [icon: docker, pos: 1298,671]
-  Container Runtime [icon: kubernetes, pos: 1490,671]
-  Typed Exception Handler [E4] [icon: server]
-  Run Telemetry Collector [E2] [icon: prometheus]
-}
-
-CLI Command Router > Ask Input Gateway [conduit: REST]
-Ask Input Gateway > Input Sanitizer [conduit: in-process]
-Input Sanitizer > Intent Parser and Safety Screen [conduit: in-process]
-Intent Parser and Safety Screen > LangGraph Orchestrator [conduit: structured JSON]
-CLI Command Router > LangGraph Orchestrator [conduit: in-process]
-CLI Command Router > Typed Exception Handler [conduit: in-process]
-LangGraph Orchestrator > Drug State Reducers [conduit: shared mutable state]
-
-FDA Labels API > FDA Fetcher [conduit: REST]
-DailyMed API > DailyMed Fetcher [C5] [conduit: REST]
-ClinicalTrials API > ClinicalTrials Fetcher [conduit: REST]
-EuropePMC API > EuropePMC Fetcher [conduit: REST]
-Semantic Scholar API > Semantic Scholar Fetcher [conduit: REST]
-PubChem API > PubChem Fetcher [conduit: REST]
-ChEMBL API > ChEMBL Fetcher [conduit: REST]
-PharmGKB API > PharmGKB Fetcher [conduit: REST]
-FAERS API > FAERS Fetcher [C1] [conduit: REST]
-
-FDA Fetcher > Fetch Cache [E3] [conduit: cache-aside]
-DailyMed Fetcher [C5] > Fetch Cache [E3] [conduit: cache-aside]
-ClinicalTrials Fetcher > Fetch Cache [E3] [conduit: cache-aside]
-EuropePMC Fetcher > Fetch Cache [E3] [conduit: cache-aside]
-Semantic Scholar Fetcher > Fetch Cache [E3] [conduit: cache-aside]
-PubChem Fetcher > Fetch Cache [E3] [conduit: cache-aside]
-ChEMBL Fetcher > Fetch Cache [E3] [conduit: cache-aside]
-PharmGKB Fetcher > Fetch Cache [E3] [conduit: cache-aside]
-FAERS Fetcher [C1] > Fetch Cache [E3] [conduit: cache-aside]
-
-LangGraph Orchestrator > FDA Fetcher [conduit: parallel fan-out]
-LangGraph Orchestrator > DailyMed Fetcher [C5] [conduit: parallel fan-out]
-LangGraph Orchestrator > ClinicalTrials Fetcher [conduit: parallel fan-out]
-LangGraph Orchestrator > EuropePMC Fetcher [conduit: parallel fan-out]
-LangGraph Orchestrator > Semantic Scholar Fetcher [conduit: parallel fan-out]
-LangGraph Orchestrator > PubChem Fetcher [conduit: parallel fan-out]
-LangGraph Orchestrator > ChEMBL Fetcher [conduit: parallel fan-out]
-LangGraph Orchestrator > PharmGKB Fetcher [conduit: parallel fan-out]
-LangGraph Orchestrator > FAERS Fetcher [C1] [conduit: parallel fan-out]
-
-FDA Fetcher > Evidence Combiner [A1] [conduit: parallel fan-in]
-DailyMed Fetcher [C5] > Evidence Combiner [A1] [conduit: parallel fan-in]
-ClinicalTrials Fetcher > Evidence Combiner [A1] [conduit: parallel fan-in]
-EuropePMC Fetcher > Evidence Combiner [A1] [conduit: parallel fan-in]
-Semantic Scholar Fetcher > Evidence Combiner [A1] [conduit: parallel fan-in]
-PubChem Fetcher > Evidence Combiner [A1] [conduit: parallel fan-in]
-ChEMBL Fetcher > Evidence Combiner [A1] [conduit: parallel fan-in]
-PharmGKB Fetcher > Evidence Combiner [A1] [conduit: parallel fan-in]
-FAERS Fetcher [C1] > Evidence Combiner [A1] [conduit: parallel fan-in]
-
-Evidence Combiner [A1] > Evidence Repository [conduit: deduplicate]
-Evidence Combiner [A1] > PRISMA Counts Store [conduit: stage counts]
-Evidence Combiner [A1] > Semantic Chunker [conduit: in-process]
-Semantic Chunker > Embedding Worker [E2] [conduit: batched chunks]
-Embedding Worker [E2] > Embedding API Client [conduit: REST]
-Embedding API Client > OpenAI API [conduit: REST]
-Embedding Worker [E2] > Qdrant Vector Repository [conduit: upsert]
-Embedding Worker [E2] > Run Telemetry Collector [E2] [conduit: token cost]
-
-Qdrant Vector Repository > Section Retrieval Engine [B1/B2] [conduit: section-targeted search]
-Section Retrieval Engine [B1/B2] > Structured Extraction Worker [Step 3] [conduit: parallel per-paper]
-Structured Extraction Worker [Step 3] > Finding Extraction Client [conduit: REST]
-Finding Extraction Client > OpenAI API [conduit: REST]
-Structured Extraction Worker [Step 3] > Extraction Cache [v2] [conduit: cache-aside]
-Structured Extraction Worker [Step 3] > Extraction Rescue Classifier [conduit: in-process]
-Extraction Rescue Classifier > Report Synthesis Client [conduit: structured findings]
-
-Report Synthesis Client > OpenAI API [conduit: REST]
-Report Synthesis Client > Report Post Processor [A3] [conduit: in-process]
-Crossref Retraction API > Report Post Processor [A3] [conduit: REST]
-Report Post Processor [A3] > Drug Intelligence Report [conduit: render report]
-PRISMA Counts Store > Report Post Processor [A3] [conduit: PRISMA splice]
-Report Post Processor [A3] > Self Evaluation Heuristics [conduit: structural evaluation]
-Self Evaluation Heuristics > Corrective Retrieval Pass [conduit: conditional one-pass correction]
-Corrective Retrieval Pass > Section Retrieval Engine [B1/B2] [conduit: boosted section retrieval]
-Self Evaluation Heuristics > Critic Agent [D2] [conduit: optional critic]
-Critic Agent [D2] > Drug Intelligence Report [conduit: additive appendix]
-
-LangGraph Orchestrator > Comparison Orchestrator [D1] [conduit: conditional two-drug mode]
-Comparison Orchestrator [D1] > Drug A Evidence Stream [conduit: parallel drug pipeline]
-Comparison Orchestrator [D1] > Drug B Evidence Stream [conduit: parallel drug pipeline]
-Drug A Evidence Stream > Head-to-Head Screening Gate [Step B] [conduit: parallel fan-in]
-Drug B Evidence Stream > Head-to-Head Screening Gate [Step B] [conduit: parallel fan-in]
-Head-to-Head Screening Gate [Step B] > Screening Decision Cache [conduit: cache-aside]
-Head-to-Head Screening Gate [Step B] > Report Synthesis Client [conduit: screened comparison findings]
-Head-to-Head Screening Gate [Step B] > Comparison Refusal Report [conduit: conditional insufficient evidence]
-
-Drug Intelligence Report > Markdown to PDF Exporter [B3] [conduit: optional export]
-Markdown to PDF Exporter [B3] > ReportLab Renderer [conduit: render PDF]
-Markdown to PDF Exporter [B3] > Branded PDF Report [conduit: PDF output]
-Batch Evaluation Harness [E1] > Drug Intelligence Report [conduit: batch parse]
-Batch Evaluation Harness [E1] > Quality Metrics CSV [conduit: aggregate metrics]
-Run Telemetry Collector [E2] > Cost and Latency Store [E2] [conduit: per-run metrics]
-
-GitHub Repo > CI Pipeline [conduit: webhook]
-CI Pipeline > Image Registry [conduit: push]
-Image Registry > Container Runtime [conduit: pull/deploy]
+tensorflow [icon: ai::tensorflow, pos: 420,533, name: tensorflow _1]
+tensorflow > workflow-entrypoint
+tensorflow > python-runtime
